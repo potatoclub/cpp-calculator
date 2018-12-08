@@ -9,6 +9,7 @@ class Calculator {
 private:
 
 	std::string _LastError;
+	std::string _LastParse;
 
 	std::vector <std::pair<std::string, std::function<double(double)>>> _Funcs = {					// name, function
 		std::make_pair("ln", [](double a) { return log(a); }),
@@ -25,9 +26,16 @@ private:
 	};
 
 	std::vector <std::tuple<char, size_t, std::function<double(double, double)>>> _Operators = {	// char, precendence, function
-		std::make_tuple('+', 0, [](double a, double b) { return a + b; }),
+		std::make_tuple('^', 0, [](double a, double b) { return pow(a, b); }),
+		std::make_tuple('*', 1, [](double a, double b) { return a * b; }),
+		std::make_tuple('/', 1, [](double a, double b) { return a / b; }),
+		std::make_tuple('+', 2, [](double a, double b) { return a + b; }),
+		std::make_tuple('-', 2, [](double a, double b) { return a - b; })
 	};
 	/// precendence is inverse; lower values are calculated first
+
+	static size_t _ScopeAt(std::string s, size_t idx);
+
 
 public:
 
