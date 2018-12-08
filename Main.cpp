@@ -4,16 +4,21 @@
 #include "stdafx.h"
 #include "Calculator.h"
 #include <iostream>
+#include <iomanip>
 
 
 int main()
 {
 
 	std::string s;
-	std::getline(std::cin, s);
+	std::cout << std::setprecision(8);
 
-	std::cout << Calculator::Calculate(s);
+	while (true) {
+		std::getline(std::cin, s);
+		if (s == "end") break;
 
+		std::cout << Calculator::Calculate(s) << "\n";
+	}
     return 0;
 }
 

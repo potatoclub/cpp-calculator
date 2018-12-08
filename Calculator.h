@@ -3,9 +3,8 @@
 
 
 
-class Calculator {
-public:
+namespace Calculator {
 
-	static double Calculate(std::string in);
+	double Calculate(std::string in);
 
-};
+}
