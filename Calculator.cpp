@@ -132,12 +132,8 @@ std::optional<double> Calculator::Calculate(std::string in) {
 				}
 
 				if (!left || !right) throw "well flip";
-				
-				std::cout << in << "\n";
-				char c = in[min];
-				std::string s;
-				s += c;
-				std::cout << "Operands for \'" << s << "\' operation: ";
+
+				std::cout << "Operands for \'" << in[min] << "\' operation: ";
 					std::cout << left.value() << " " << right.value() << "\n";
 
 				std::stringstream ss;
