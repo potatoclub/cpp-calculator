@@ -22,7 +22,7 @@ int main()
 
 		auto n = Calc.Calculate(s);
 		if (n)
-			std::cout << n.value() << "\n";
+			std::cout << "Final Result: " << n.value() << "\n";
 		else std::cout << "Error: " << Calc.LastError() << "\n";
 	}
     return 0;

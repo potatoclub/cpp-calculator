@@ -5,6 +5,7 @@
 #include <sstream>
 #include <iomanip>
 #include <iostream>
+#include <cassert>
 
 
 
@@ -34,6 +35,8 @@ std::optional<double> Calculator::Calculate(std::string in) {
 		_LastError = "";
 		_LastParse = in;
 
+		std::cout << "Now Calculating: " << in << "\n";
+
 		if (in == "") return std::optional<double>();
 		if (in.front() == '(' && in.back() == ')') {
 			bool flag = false;
@@ -43,15 +46,16 @@ std::optional<double> Calculator::Calculate(std::string in) {
 			}
 			if (!flag) {
 				in = in.substr(1, in.size() - 2);
-				std::cout << "new str: " << in << "\n";
+				std::cout << "Trimmed to: " << in << "\n";
 			}
-			else std::cout << "nope: " << in << "\n";
 		}
 		if (in == "") return std::optional<double>();
 
 		// Check if just a number
-		if (!in.empty() && boost::count(in, '.') < 2 && in.find_first_not_of(".0123456789", size_t(in[0] == '-')) == std::string::npos)
+		if (!in.empty() && boost::count(in, '.') < 2 && in.find_first_not_of(".0123456789", size_t(in[0] == '-')) == std::string::npos) {
+			std::cout << "Found to be: " << std::stod(in) << "\n";
 			return std::stod(in);
+		}
 
 		// Search for any functions
 		size_t min = std::string::npos, fidx = 0;
@@ -95,7 +99,7 @@ std::optional<double> Calculator::Calculate(std::string in) {
 			minprec = std::numeric_limits<size_t>::max();
 			for (size_t i = 0; i < _Operators.size(); i++) {
 				auto j = in.find_first_of(std::get<0>(_Operators[i]));
-				if (j != std::string::npos && j < min && std::get<1>(_Operators[i]) <= minprec) {
+				if (j != std::string::npos && j < min && _ScopeAt(in, j) == 0 && std::get<1>(_Operators[i]) <= minprec) {
 					min = j;
 					minprec = std::get<1>(_Operators[i]);
 					oidx = i;
@@ -108,7 +112,6 @@ std::optional<double> Calculator::Calculate(std::string in) {
 					for (long lt = 0; lc >= 0 && lt >= 0; lc--) {
 						if (in[lc] == ')') lt++; else if (in[lc] == '(') lt--;
 					}
-					std::cout << in.substr(lc + 1, min - lc - 1) << "\n";
 					left = Calculate(in.substr(lc + 1, min - lc - 1));
 				}
 				else {
@@ -120,26 +123,29 @@ std::optional<double> Calculator::Calculate(std::string in) {
 					for (long rt = 0; rc < (long)in.size() && rt >= 0; rc++) {
 						if (in[rc] == '(') rt++; else if (in[rc] == ')') rt--;
 					}
-					std::cout << in.substr(min + 1, rc - min - 1) << "\n";
 					right = Calculate(in.substr(min + 1, rc - min - 1));
 				}
 				else {
 					auto k = in.substr(min + 1).find_first_not_of(".0123456789", size_t(in[min + 1] == '-'));
-					std::cout << "r: " << in.substr(min + 1, k == std::string::npos ? in.size() - min - 1 : k) << "\n";
 					right = Calculate(in.substr(min + 1, k == std::string::npos ? in.size() - min - 1 : k));
-					rc = k == std::string::npos ? in.size() - 1 : k + 2;
+					rc = k == std::string::npos ? in.size() - 1 : min + k;
 				}
 
-				if (!left || !right) throw "well shit";
+				if (!left || !right) throw "well flip";
 				
-				std::cout << left.value() << " " << right.value() << "\n";
+				std::cout << in << "\n";
+				char c = in[min];
+				std::string s;
+				s += c;
+				std::cout << "Operands for \'" << s << "\' operation: ";
+					std::cout << left.value() << " " << right.value() << "\n";
 
 				std::stringstream ss;
 				ss << std::setprecision(std::numeric_limits<double>::max_digits10) << std::fixed << 
 					std::get<2>(_Operators[oidx])(left.value(), right.value());
-				std::cout << lc << " " << rc << " " << in.size() << "\n";
 				in.replace(std::max(lc, 0L), std::min(rc, long(in.size() - 1)) - std::max(lc, 0L) + 1, ss.str());
-				std::cout << in << "\n";
+				std::cout << "Found to be: " << std::get<2>(_Operators[oidx])(left.value(), right.value()) << 
+					"\nNew string: " << in << "\n";
 			}
 			else break;
 		}
@@ -153,11 +159,10 @@ std::optional<double> Calculator::Calculate(std::string in) {
 		_LastError = "Failed to parse numerical string \"" + _LastParse + "\"";
 		return std::optional<double>();
 	}
-	catch (std::string) {
-		_LastError = "uhhh something";
-		return std::optional<double>();
+	catch (std::string msg) {
+		_LastError = msg + " (while parsing \"" + _LastParse + "\"";
 	}
 
-	_LastError = "meeeepsicle";
+	_LastError = "Unexpected character in \"" + _LastParse + "\"";
 	return std::optional<double>();
 }
