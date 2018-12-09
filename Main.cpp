@@ -11,14 +11,15 @@ int main()
 {
 
 	std::string s;
-	std::cout << std::setprecision(8);
 
 	Calculator Calc;
-
+	std::cout << std::setprecision(15);
 
 	while (true) {
 		std::getline(std::cin, s);
 		if (s == "end") break;
+
+		Calc.AddFunction("myfunc", [](double a) { return 2.0 * a; });
 
 		auto n = Calc.Calculate(s);
 		if (n)

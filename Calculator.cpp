@@ -51,11 +51,14 @@ std::optional<double> Calculator::Calculate(std::string in) {
 		}
 		if (in == "") return std::optional<double>();
 
+
 		// Check if just a number
 		if (!in.empty() && boost::count(in, '.') < 2 && in.find_first_not_of(".0123456789", size_t(in[0] == '-')) == std::string::npos) {
 			std::cout << "Found to be: " << std::stod(in) << "\n";
 			return std::stod(in);
 		}
+		if (in == "e") { std::cout << "Found to be: " << 2.7182818284590452353602 << "\n"; return 2.7182818284590452353602; }
+		if (in == "pi") { std::cout << "Found to be: " << 3.1415926535897932384626 << "\n"; return 3.1415926535897932384626; }
 
 		// Search for any functions
 		size_t min = std::string::npos, fidx = 0;
@@ -131,7 +134,10 @@ std::optional<double> Calculator::Calculate(std::string in) {
 					rc = k == std::string::npos ? in.size() - 1 : min + k;
 				}
 
-				if (!left || !right) throw "well flip";
+				if (!left || !right) {
+					if (!left) throw "Failed to find left operand";
+					if (!right) throw "Failed to find right operand";
+				}
 
 				std::cout << "Operands for \'" << in[min] << "\' operation: ";
 					std::cout << left.value() << " " << right.value() << "\n";
